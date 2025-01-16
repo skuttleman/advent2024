@@ -32,11 +32,27 @@
            (descending? report))
        (>= 3 (apply max (diffs report)))))
 
+(defn ^:private remove-level [report idx]
+  (concat (take idx report)
+          (drop (inc idx) report)))
+
+(defn ^:private dampened-safe? [report]
+  (or (safe? report)
+      (some true? (for [idx (range (count report))
+                        :let [report' (remove-level report idx)]]
+                    (safe? report')))))
+
 (defn part-1-solution [reports]
   (->> reports
        (filter safe?)
        count))
 
+(defn part-2-solution [reports]
+  (->> reports
+       (filter dampened-safe?)
+       count))
+
 (comment
   (def input (utils/read-input 2))
-  (part-1-solution (parse-input input)))
+  (part-1-solution (parse-input input))
+  (part-2-solution (parse-input input)))
