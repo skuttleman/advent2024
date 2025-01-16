@@ -17,6 +17,11 @@
   (->> (map diff (sort xs-1) (sort xs-2))
        (reduce + 0)))
 
+(defn part-2-solution [[xs-1 xs-2]]
+  (let [freqs (frequencies xs-2)]
+    (transduce (map #(* % (freqs % 0))) + 0 xs-1)))
+
 (comment
   (def input (utils/read-input 1))
-  (part-1-solution (parse-input input)))
+  (part-1-solution (parse-input input))
+  (part-2-solution (parse-input input)))
