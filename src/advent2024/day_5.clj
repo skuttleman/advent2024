@@ -27,12 +27,34 @@
 (defn ^:private middle [vals]
   (first (drop (dec (/ (count vals) 2)) vals)))
 
+(defn ^:private fix-update [rules vals]
+  (loop [idx 0
+         vals vals]
+    (let [val (get vals idx)
+          prev (take idx vals)
+          remaining (drop (inc idx) vals)
+          rule (get rules val #{})]
+      (if-let [out-of-orders (->> remaining
+                                  (filter rule)
+                                  seq)]
+        (recur 0 (vec (concat out-of-orders prev [val] (remove rule remaining))))
+        (if (seq remaining)
+          (recur (inc idx) vals)
+          vals)))))
+
 (defn part-1-solution [{:keys [rules updates]}]
   (->> updates
        (filter (partial valid-update? rules))
        (map middle)
        (reduce + 0)))
 
+(defn part-2-solution [{:keys [rules updates]}]
+  (->> updates
+       (remove (partial valid-update? rules))
+       (map (comp middle (partial fix-update rules) vec))
+       (reduce + 0)))
+
 (comment
   (def input (parse-input (utils/read-input 5)))
-  (part-1-solution input))
+  (part-1-solution input)
+  (part-2-solution input))
