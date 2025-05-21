@@ -9,28 +9,38 @@
           :let [[total & nums] (map parse-long (string/split line #":?\s+"))]]
       [total nums])))
 
+(defn ^:private || [x y]
+  (parse-long (str x y)))
 
-(defn ^:private totals?
-  ([[total nums]]
-   (totals? total (first nums) (rest nums)))
-  ([total sub-total [num :as nums]]
-   (cond
-     (and (empty? nums) (= total sub-total))
-     true
+(defn ^:private totals? [operators]
+  (fn totals*
+    ([[total nums]]
+     (totals* total (first nums) (rest nums)))
+    ([total sub-total [num :as nums]]
+     (cond
+       (and (empty? nums) (= total sub-total))
+       true
 
-     (or (> sub-total total) (empty? nums))
-     false
+       (or (> sub-total total) (empty? nums))
+       false
 
-     :else
-     (or (totals? total (+ sub-total num) (rest nums))
-         (totals? total (* sub-total num) (rest nums))))))
+       :else
+       (some #(totals* total (% sub-total num) (rest nums))
+             operators)))))
 
 (defn part-1-solution [input]
   (->> input
-       (filter totals?)
+       (filter (totals? [+ *]))
+       (map first)
+       (reduce + 0)))
+
+(defn part-2-solution [input]
+  (->> input
+       (filter (totals? [+ * ||]))
        (map first)
        (reduce + 0)))
 
 (comment
  (def input (utils/read-input 7))
- (part-1-solution (parse-input input)))
+ (part-1-solution (parse-input input))
+ (part-2-solution (parse-input input)))
